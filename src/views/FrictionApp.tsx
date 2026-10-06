@@ -1,5 +1,32 @@
-import type { ViewModel } from '../FrictionDemo';
+import type { ReactNode } from 'react';
 import { IG_GRADIENT, MONO, Ring, SANS, SERIF, monoLabel } from './shared';
+
+export interface FrictionAppVM {
+  fTab: string;
+  fTabs: { key: string; label: string; active: boolean; go: () => void }[];
+  dateLabel: string;
+  attempts: number;
+  stopped: number;
+  rate: number;
+  rateLabel: string;
+  savedLabel: string;
+  vulnerableTime: string;
+  topIntent: string;
+  recent: { key: string; t: string; intent: string; waited: number; stayLabel: string; result: string; chipBg: string; chipFg: string }[];
+  watchSource: string;
+  ruleRows: { key: string; label: string; sub: string; first: boolean; on: boolean; toggle: () => void }[];
+  pauseLabel: string;
+  /** Extra content at the bottom of the Rules tab. */
+  rulesFooter?: ReactNode;
+  streak: number;
+  best: number;
+  nextMilestone: string;
+  milestoneFilled: number;
+  /** Most recent decisions, oldest first; true = never mind. */
+  decisions: boolean[];
+}
+
+type VMProps = { v: FrictionAppVM };
 
 const muted = '#9CA3AF';
 const card = { background: '#18181B', borderRadius: 20 } as const;
@@ -14,7 +41,7 @@ function Header({ eyebrow, title }: { eyebrow: string; title: string }) {
   );
 }
 
-export default function FrictionApp({ v }: { v: ViewModel }) {
+export default function FrictionApp({ v }: VMProps) {
   return (
     <div style={{ position: 'absolute', inset: 0, background: '#0E0E10', color: '#F4F4F5', display: 'flex', flexDirection: 'column', animation: 'fr-pop .25s ease-out' }}>
       <div style={{ flex: 1, overflowY: 'auto', padding: '62px 22px 20px', display: 'flex', flexDirection: 'column', gap: 22 }}>
@@ -34,7 +61,7 @@ export default function FrictionApp({ v }: { v: ViewModel }) {
   );
 }
 
-function Today({ v }: { v: ViewModel }) {
+function Today({ v }: VMProps) {
   const stat = (value: string | number, label: string, mid = false) => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 2, ...(mid ? { borderLeft: divider, borderRight: divider } : {}) }}>
       <span style={{ fontSize: 22, fontWeight: 700 }}>{value}</span>
@@ -46,7 +73,7 @@ function Today({ v }: { v: ViewModel }) {
       <Header eyebrow="Today · Instagram" title={v.dateLabel} />
       <div style={{ display: 'flex', flexDirection: 'column', gap: 22 }}>
         <span style={{ fontSize: 28, lineHeight: 1.15, fontWeight: 700, letterSpacing: '-.01em', textWrap: 'balance' }}>
-          You stopped <span style={{ color: '#C084FC' }}>{v.stopped} Instagram opens</span> today.
+          You stopped <span style={{ color: '#C084FC' }}>{v.stopped} Instagram {v.stopped === 1 ? 'open' : 'opens'}</span> today.
         </span>
         <div style={{ display: 'flex', justifyContent: 'center' }}>
           <div style={{ position: 'relative', width: 200, height: 200 }}>
@@ -78,7 +105,7 @@ function Today({ v }: { v: ViewModel }) {
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
         <div style={{ ...card, borderRadius: 18, padding: 14, display: 'flex', flexDirection: 'column', gap: 4 }}>
           <span style={{ fontSize: 12, color: muted }}>Most vulnerable time</span>
-          <span style={{ fontSize: 16, fontWeight: 700 }}>11 PM – 1 AM</span>
+          <span style={{ fontSize: 16, fontWeight: 700 }}>{v.vulnerableTime}</span>
         </div>
         <div style={{ ...card, borderRadius: 18, padding: 14, display: 'flex', flexDirection: 'column', gap: 4 }}>
           <span style={{ fontSize: 12, color: muted }}>Most common reason</span>
@@ -88,7 +115,7 @@ function Today({ v }: { v: ViewModel }) {
       <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
         <span style={monoLabel(11, muted, { marginBottom: 6 })}>Recent attempts</span>
         {v.recent.map(e => (
-          <div key={`${e.n}-${e.t}-${e.result}`} style={{ display: 'grid', gridTemplateColumns: '48px 1fr auto', gap: 10, alignItems: 'center', padding: '10px 0', borderTop: divider }}>
+          <div key={e.key} style={{ display: 'grid', gridTemplateColumns: '48px 1fr auto', gap: 10, alignItems: 'center', padding: '10px 0', borderTop: divider }}>
             <span style={{ font: `400 12px ${MONO}`, color: muted }}>{e.t}</span>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
               <span style={{ fontSize: 14, fontWeight: 600 }}>{e.intent}</span>
@@ -102,7 +129,7 @@ function Today({ v }: { v: ViewModel }) {
   );
 }
 
-function Rules({ v }: { v: ViewModel }) {
+function Rules({ v }: VMProps) {
   return (
     <>
       <Header eyebrow="Rules" title="One app. One pause." />
@@ -110,7 +137,7 @@ function Rules({ v }: { v: ViewModel }) {
         <div style={{ width: 44, height: 44, borderRadius: 11, background: IG_GRADIENT, flex: 'none' }} />
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 2 }}>
           <span style={{ fontSize: 16, fontWeight: 700 }}>Instagram</span>
-          <span style={{ fontSize: 12, color: muted }}>Selected via Screen Time</span>
+          <span style={{ fontSize: 12, color: muted }}>{v.watchSource}</span>
         </div>
         <span style={{ fontSize: 12, fontWeight: 700, color: '#C084FC' }}>Watching</span>
       </div>
@@ -134,11 +161,12 @@ function Rules({ v }: { v: ViewModel }) {
         </div>
         <span style={{ font: `400 30px ${SERIF}` }}>{v.pauseLabel}</span>
       </div>
+      {v.rulesFooter}
     </>
   );
 }
 
-function Streak({ v }: { v: ViewModel }) {
+function Streak({ v }: VMProps) {
   return (
     <>
       <Header eyebrow="Streak" title="Never-minds in a row" />

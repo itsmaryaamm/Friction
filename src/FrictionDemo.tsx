@@ -1,5 +1,6 @@
 import { Component, type ChangeEvent, type KeyboardEvent } from 'react';
 import DemoView from './views/DemoView';
+import { DEFAULT_DONE_LINE, DONE_LINES, INTENTS, MINUTES_SAVED_PER_STOP, chipColors, nextMilestone, ord, pausePhase } from './core';
 
 export type Screen = 'lock' | 'home' | 'shield' | 'intervene' | 'insta' | 'friction';
 type FTab = 'today' | 'rules' | 'streak';
@@ -68,15 +69,6 @@ export interface DemoProps {
   pauseSeconds?: number;
 }
 
-const INTENTS = ['Reply to someone', 'Post something', 'Find something', 'Just scrolling', "I don't know"];
-
-const DONE_LINES: Record<string, string> = {
-  'Reply to someone': 'Go reply. Then come back.',
-  'Post something': 'Post it. Then come back.',
-  'Find something': 'Find it. Then close it.',
-  'Just scrolling': 'You know what this is. Still your choice.',
-};
-
 const APPS: [string, string][] = [
   ['Calendar', '#B65C4A'], ['Photos', '#C9A24A'], ['Camera', '#5B5550'], ['Clock', '#3A3633'],
   ['Maps', '#5E8A6A'], ['Weather', '#4E7BA6'], ['Notes', '#C8A23E'], ['Mail', '#4C72B0'],
@@ -102,8 +94,6 @@ const RULES: [RuleKey, string, string][] = [
   ['askWhy', "Ask why I'm opening it", "Reply · Post · Find · Scroll · Don't know"],
   ['showPattern', 'Show me my pattern', 'Your own numbers during the pause'],
 ];
-
-const MILESTONES = [5, 10, 25, 50];
 
 function initialState(): DemoState {
   return {
@@ -132,11 +122,6 @@ function initialState(): DemoState {
 function fmt(m: number) {
   const h = Math.floor(m / 60) % 24, mm = m % 60;
   return `${h}:${String(mm).padStart(2, '0')}`;
-}
-
-function ord(n: number) {
-  const s = ['th', 'st', 'nd', 'rd'], v = n % 100;
-  return n + (s[(v - 20) % 10] || s[v] || s[0]);
 }
 
 export default class FrictionDemo extends Component<DemoProps, DemoState> {
@@ -324,14 +309,9 @@ export default class FrictionDemo extends Component<DemoProps, DemoState> {
       fn();
     };
 
-    const third = D / 3;
-    let phase: 'intent' | 'reality' | 'plain' | 'final' | 'done' = 'intent';
-    if (scr === 'intervene') {
-      if (e >= D) phase = 'done';
-      else if (e >= third * 2) phase = 'final';
-      else if (s.rules.askWhy && !s.intent && e < third) phase = 'intent';
-      else phase = s.rules.showPattern ? 'reality' : 'plain';
-    }
+    const phase = scr === 'intervene'
+      ? pausePhase(e, D, { askWhy: s.rules.askWhy, showPattern: s.rules.showPattern, intent: s.intent })
+      : 'intent';
 
     const recentCount = s.log.slice(-3).length;
     const v = s.variant % 3;
@@ -345,8 +325,7 @@ export default class FrictionDemo extends Component<DemoProps, DemoState> {
     s.log.forEach(l => { if (INTENTS.includes(l.intent)) counts[l.intent] = (counts[l.intent] || 0) + 1; });
     const topIntent = Object.keys(counts).sort((a, b) => counts[b] - counts[a])[0] || 'Just scrolling';
 
-    const chip = (r: Result) => (r === 'Never mind' ? ['rgba(168,85,247,.18)', '#C084FC'] : ['#232327', '#9CA3AF']);
-    const next = MILESTONES.find(m => m > s.streak) || 100;
+    const next = nextMilestone(s.streak);
     const light = scr === 'insta' && s.iTab !== 'reels';
     const thread = s.threads.find(t => t.id === s.thread);
     const notInDemo = (title: string) => () => this.showToast({ title, body: 'Not part of the demo — try Instagram.' });
@@ -373,7 +352,7 @@ export default class FrictionDemo extends Component<DemoProps, DemoState> {
       attempts: s.attempts, stopped: s.stopped, streak: s.streak, best: s.best,
       rate,
       rateLabel: rate + '%',
-      savedLabel: s.stopped * 7 + 'm',
+      savedLabel: s.stopped * MINUTES_SAVED_PER_STOP + 'm',
       unlock: tap(() => this.go('home')),
       openStreak: tap(() => this.go('friction', { fTab: 'streak' })),
       openToday: tap(() => this.go('friction', { fTab: 'today' })),
@@ -395,7 +374,7 @@ export default class FrictionDemo extends Component<DemoProps, DemoState> {
       intents: INTENTS.map(label => ({ label, pick: tap(() => this.pickIntent(label)) })),
       reality,
       realityTag: s.intent ? `You said: ${s.intent}` : 'Your pattern',
-      doneLine: (s.intent && DONE_LINES[s.intent]) || 'You waited. Still your choice.',
+      doneLine: (s.intent && DONE_LINES[s.intent]) || DEFAULT_DONE_LINE,
       nevermindLabel: phase === 'done' ? 'Never mind' : 'Actually, never mind',
 
       // Instagram
@@ -442,10 +421,14 @@ export default class FrictionDemo extends Component<DemoProps, DemoState> {
       // Friction app
       fTab: s.fTab,
       topIntent,
-      recent: s.log.slice(-6).reverse().map(l => {
-        const [chipBg, chipFg] = chip(l.result);
-        return { ...l, stayLabel: l.stay ? ` · stayed ${l.stay} min` : '', chipBg, chipFg };
-      }),
+      vulnerableTime: '11 PM – 1 AM',
+      recent: s.log.slice(-6).reverse().map(l => ({
+        ...l,
+        key: `${l.n}-${l.t}-${l.result}`,
+        stayLabel: l.stay ? ` · stayed ${l.stay} min` : '',
+        ...chipColors(l.result),
+      })),
+      watchSource: 'Selected via Screen Time',
       ruleRows: RULES.map(([k, label, sub], i) => ({
         key: k,
         label,

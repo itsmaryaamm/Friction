@@ -18,6 +18,17 @@ The demo is published to GitHub Pages at https://itsmaryaamm.github.io/Friction/
 
 On a phone-sized screen it runs full-screen without the device frame or side panels. In Safari, tap **Share → Add to Home Screen** to open it like an app.
 
+## Live app (real Instagram)
+
+On a phone, or with `?app`, the site is the real Friction app: Today / Rules / Streak from real data stored on the device (localStorage). Opened with `?pause`, it runs the shield and 15-second pause for one Instagram attempt.
+
+It's wired to the real Instagram with iPhone Shortcuts, which is free and needs no developer account:
+
+- An automation for **Instagram is opened** opens `https://itsmaryaamm.github.io/Friction/?pause`, unless a pass from the last 10 minutes exists.
+- **Open Instagram** in the pause runs the `Friction Open` shortcut. That shortcut saves the current time as the pass and opens Instagram.
+
+Add `?demo` to see the investor demo on a phone.
+
 ## What's in the demo
 
 A phone mock with a narrative panel on the left and a live metric panel ("impulse opens prevented") plus event log on the right.

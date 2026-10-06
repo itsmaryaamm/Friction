@@ -1,7 +1,12 @@
-import type { ViewModel } from '../FrictionDemo';
 import { IG_GRADIENT, IgGlyph, MONO, SERIF } from './shared';
 
-export default function ShieldScreen({ v }: { v: ViewModel }) {
+export interface ShieldVM {
+  shieldSub: string;
+  shieldContinue: () => void;
+  neverMind: () => void;
+}
+
+export default function ShieldScreen({ v }: { v: ShieldVM }) {
   return (
     <div style={{ position: 'absolute', inset: 0, background: '#1E1A16', display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '0 26px 60px', boxSizing: 'border-box', animation: 'fr-pop .2s ease-out' }}>
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 16, textAlign: 'center' }}>

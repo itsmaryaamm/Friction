@@ -1,9 +1,27 @@
-import type { ViewModel } from '../FrictionDemo';
 import { IG_GRADIENT, MONO, Ring, SERIF, monoLabel } from './shared';
 
 const headline = { font: `400 36px/1.06 ${SERIF}` } as const;
 
-export default function InterventionScreen({ v }: { v: ViewModel }) {
+/** Steps of the pause, in order. */
+export type Phase = 'intent' | 'reality' | 'plain' | 'final' | 'done';
+
+export interface InterventionVM {
+  phase: Phase;
+  ivTag: string;
+  ringColor: string;
+  /** 0–1, how much of the pause has elapsed. */
+  ringProgress: number;
+  ivNum: number;
+  intents: { label: string; pick: () => void }[];
+  realityTag: string;
+  reality: { h: string; s: string };
+  doneLine: string;
+  nevermindLabel: string;
+  openInsta: () => void;
+  neverMind: () => void;
+}
+
+export default function InterventionScreen({ v }: { v: InterventionVM }) {
   const { phase } = v;
   return (
     <div style={{ position: 'absolute', inset: 0, background: '#16130F', color: '#F3EDE2', display: 'flex', flexDirection: 'column', padding: '64px 24px 44px', boxSizing: 'border-box' }}>
