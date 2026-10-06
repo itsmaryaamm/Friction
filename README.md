@@ -12,6 +12,12 @@ npm run dev      # local dev server
 npm run build    # typecheck + production build into dist/
 ```
 
+## On your phone
+
+The demo is published to GitHub Pages at https://itsmaryaamm.github.io/Friction/ by `.github/workflows/deploy.yml` on every push.
+
+On a phone-sized screen it runs full-screen without the device frame or side panels. In Safari, tap **Share → Add to Home Screen** to open it like an app.
+
 ## What's in the demo
 
 A phone mock with a narrative panel on the left and a live metric panel ("impulse opens prevented") plus event log on the right.

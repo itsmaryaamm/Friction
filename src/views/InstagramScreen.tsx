@@ -125,7 +125,7 @@ function ThreadView({ v }: { v: ViewModel }) {
         ))}
       </div>
       <div style={{ padding: '8px 14px 40px', display: 'flex', gap: 8 }}>
-        <input value={v.draft} onChange={v.setDraft} onKeyDown={v.draftKey} placeholder="Message…" style={{ flex: 1, height: 42, borderRadius: 21, border: '1px solid #DDD', padding: '0 16px', font: `15px ${SANS}`, outline: 'none' }} />
+        <input value={v.draft} onChange={v.setDraft} onKeyDown={v.draftKey} placeholder="Message…" style={{ flex: 1, height: 42, borderRadius: 21, border: '1px solid #DDD', padding: '0 16px', font: `16px ${SANS}`, outline: 'none' }} />
         <button onClick={v.send} style={{ border: 0, background: 'transparent', color: '#3B6FD8', fontWeight: 700, fontSize: 15, cursor: 'pointer' }}>Send</button>
       </div>
     </>

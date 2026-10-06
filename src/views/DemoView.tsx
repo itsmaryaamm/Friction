@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import type { ViewModel } from '../FrictionDemo';
 import { FrictionMark, MONO, SERIF, monoLabel } from './shared';
 import LockScreen from './LockScreen';
@@ -7,7 +8,29 @@ import InterventionScreen from './InterventionScreen';
 import InstagramScreen from './InstagramScreen';
 import FrictionApp from './FrictionApp';
 
+const PHONE_QUERY = '(max-width: 500px)';
+
+/** True on a real phone, where the demo runs full-screen like an app. */
+function useIsPhone() {
+  const [isPhone, setIsPhone] = useState(() => window.matchMedia(PHONE_QUERY).matches);
+  useEffect(() => {
+    const mq = window.matchMedia(PHONE_QUERY);
+    const onChange = () => setIsPhone(mq.matches);
+    mq.addEventListener('change', onChange);
+    return () => mq.removeEventListener('change', onChange);
+  }, []);
+  return isPhone;
+}
+
 export default function DemoView({ v }: { v: ViewModel }) {
+  const isPhone = useIsPhone();
+  if (isPhone) {
+    return (
+      <div style={{ position: 'fixed', inset: 0, overflow: 'hidden', background: '#16130F' }}>
+        <PhoneScreen v={v} fullscreen />
+      </div>
+    );
+  }
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexWrap: 'wrap', gap: 48, justifyContent: 'center', alignItems: 'center', padding: '48px 32px', boxSizing: 'border-box' }}>
       {v.showPanels && <StoryPanel v={v} />}
@@ -95,35 +118,51 @@ function MetricPanel({ v }: { v: ViewModel }) {
 }
 
 function Phone({ v }: { v: ViewModel }) {
-  const sc = v.screen;
   return (
     <div style={{ width: 414, height: 868, borderRadius: 64, background: '#0B0A09', padding: 12, boxSizing: 'border-box', boxShadow: '0 40px 80px -30px rgba(22,19,15,.55),inset 0 0 0 2px #2B2724', flex: 'none' }}>
       <div style={{ position: 'relative', width: 390, height: 844, borderRadius: 52, overflow: 'hidden', background: '#16130F' }}>
-        {sc === 'lock' && <LockScreen v={v} />}
-        {sc === 'home' && <HomeScreen v={v} />}
-        {sc === 'shield' && <ShieldScreen v={v} />}
-        {sc === 'intervene' && <InterventionScreen v={v} />}
-        {sc === 'insta' && <InstagramScreen v={v} />}
-        {sc === 'friction' && <FrictionApp v={v} />}
-
-        {/* Status bar */}
-        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 54, display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0 34px 0 44px', boxSizing: 'border-box', pointerEvents: 'none', color: v.statusColor, fontSize: 16, fontWeight: 600 }}>
-          <span>{v.clock}</span>
-          <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
-            <div style={{ width: 18, height: 11, borderRadius: 2, border: `1.5px solid ${v.statusColor}`, opacity: 0.5 }} />
-            <div style={{ width: 26, height: 12, borderRadius: 4, border: `1.5px solid ${v.statusColor}`, padding: 1.5, boxSizing: 'border-box' }}>
-              <div style={{ width: '70%', height: '100%', borderRadius: 2, background: v.statusColor }} />
-            </div>
-          </div>
-        </div>
-        {/* Dynamic island */}
-        <div style={{ position: 'absolute', top: 11, left: '50%', transform: 'translateX(-50%)', width: 124, height: 36, borderRadius: 20, background: '#000', pointerEvents: 'none' }} />
-        {v.showHomeBar && (
-          <button onClick={v.goHome} title="Go home" style={{ position: 'absolute', bottom: 0, left: '50%', transform: 'translateX(-50%)', width: 180, height: 26, border: 0, background: 'transparent', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0 }}>
-            <div style={{ width: 134, height: 5, borderRadius: 3, background: v.statusColor }} />
-          </button>
-        )}
+        <PhoneScreen v={v} />
       </div>
     </div>
+  );
+}
+
+/**
+ * The phone's contents. Framed on desktop; on a real phone it fills the
+ * viewport and the device's own status bar replaces the drawn one.
+ */
+function PhoneScreen({ v, fullscreen = false }: { v: ViewModel; fullscreen?: boolean }) {
+  const sc = v.screen;
+  return (
+    <>
+      {sc === 'lock' && <LockScreen v={v} />}
+      {sc === 'home' && <HomeScreen v={v} />}
+      {sc === 'shield' && <ShieldScreen v={v} />}
+      {sc === 'intervene' && <InterventionScreen v={v} />}
+      {sc === 'insta' && <InstagramScreen v={v} />}
+      {sc === 'friction' && <FrictionApp v={v} />}
+
+      {!fullscreen && (
+        <>
+          {/* Status bar */}
+          <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 54, display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0 34px 0 44px', boxSizing: 'border-box', pointerEvents: 'none', color: v.statusColor, fontSize: 16, fontWeight: 600 }}>
+            <span>{v.clock}</span>
+            <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+              <div style={{ width: 18, height: 11, borderRadius: 2, border: `1.5px solid ${v.statusColor}`, opacity: 0.5 }} />
+              <div style={{ width: 26, height: 12, borderRadius: 4, border: `1.5px solid ${v.statusColor}`, padding: 1.5, boxSizing: 'border-box' }}>
+                <div style={{ width: '70%', height: '100%', borderRadius: 2, background: v.statusColor }} />
+              </div>
+            </div>
+          </div>
+          {/* Dynamic island */}
+          <div style={{ position: 'absolute', top: 11, left: '50%', transform: 'translateX(-50%)', width: 124, height: 36, borderRadius: 20, background: '#000', pointerEvents: 'none' }} />
+        </>
+      )}
+      {v.showHomeBar && (
+        <button onClick={v.goHome} title="Go home" style={{ position: 'absolute', bottom: 0, left: '50%', transform: 'translateX(-50%)', width: 180, height: 26, border: 0, background: 'transparent', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0 }}>
+          <div style={{ width: 134, height: 5, borderRadius: 3, background: v.statusColor }} />
+        </button>
+      )}
+    </>
   );
 }
