@@ -366,7 +366,7 @@ export default class FrictionDemo extends Component<DemoProps, DemoState> {
       shieldContinue: tap(this.shieldContinue),
       neverMind: tap(this.neverMind),
       openInsta: tap(this.openInsta),
-      ivTag: `ATTEMPT #${s.attempts} · ${fmt(s.min)}`,
+      attempt: s.attempts,
       phase,
       ringColor: phase === 'final' || phase === 'done' ? '#A855F7' : '#F3EDE2',
       ringProgress: e / D,

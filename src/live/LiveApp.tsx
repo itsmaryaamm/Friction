@@ -135,7 +135,7 @@ function Pause({ data, commit, onShowStats }: { data: LiveData; commit: Commit; 
   return (
     <InterventionScreen v={{
       phase,
-      ivTag: `ATTEMPT #${n} · ${clock(id)}`,
+      attempt: n,
       ringColor: phase === 'final' || phase === 'done' ? '#A855F7' : '#F3EDE2',
       ringProgress: elapsed / PAUSE_SECONDS,
       ivNum: Math.max(0, Math.ceil(PAUSE_SECONDS - elapsed - 0.001)),
@@ -146,13 +146,14 @@ function Pause({ data, commit, onShowStats }: { data: LiveData; commit: Commit; 
       nevermindLabel: phase === 'done' ? 'Never mind' : 'Actually, never mind',
       openInsta,
       neverMind,
-    }} />
+      openHint: 'Starts your 10-minute pass and timer.',
+    }} fullscreen />
   );
 }
 
 function Closed({ streak, stopped, onShowStats }: { streak: number; stopped: number; onShowStats: () => void }) {
   return (
-    <div style={{ position: 'absolute', inset: 0, background: '#16130F', color: '#F3EDE2', display: 'flex', flexDirection: 'column', padding: '64px 24px 44px', boxSizing: 'border-box', animation: 'fr-pop .25s ease-out' }}>
+    <div style={{ position: 'absolute', inset: 0, background: '#16130F', color: '#F3EDE2', display: 'flex', flexDirection: 'column', padding: 'calc(env(safe-area-inset-top, 0px) + 28px) 24px calc(env(safe-area-inset-bottom, 0px) + 24px)', boxSizing: 'border-box', animation: 'fr-pop .25s ease-out' }}>
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', gap: 14, textAlign: 'center' }}>
         <span style={monoLabel(11, '#A855F7')}>Instagram closed</span>
         <span style={{ font: `400 52px/1 ${SERIF}` }}>{streak} in a row.</span>
@@ -229,7 +230,7 @@ function SetupCard({ onTest, onReset }: { onTest: () => void; onReset: () => voi
       <span style={{ fontSize: 15, fontWeight: 600 }}>How it's connected</span>
       <span style={{ fontSize: 13, color: '#9CA3AF', lineHeight: 1.45 }}>
         A Shortcuts automation sends you here whenever Instagram opens. Choosing "Open Instagram" runs the
-        "{OPEN_SHORTCUT}" shortcut, which lets you in for 10 minutes.
+        "{OPEN_SHORTCUT}" shortcut, which lets you in for 10 minutes and starts a 10-minute Clock timer.
       </span>
       <button onClick={onTest} style={{ ...btn, background: '#F4F4F5', color: '#0E0E10' }}>Test the pause</button>
       <button onClick={onReset} style={{ ...btn, background: 'transparent', color: '#9CA3AF', fontWeight: 600 }}>Reset my data</button>

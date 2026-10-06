@@ -1,4 +1,4 @@
-import { IG_GRADIENT, MONO, Ring, SERIF, monoLabel } from './shared';
+import { MONO, Ring, SANS, SERIF, monoLabel } from './shared';
 
 const headline = { font: `400 36px/1.06 ${SERIF}` } as const;
 
@@ -7,7 +7,8 @@ export type Phase = 'intent' | 'reality' | 'plain' | 'final' | 'done';
 
 export interface InterventionVM {
   phase: Phase;
-  ivTag: string;
+  /** Real attempt count, shown as the screen's heading. */
+  attempt: number;
   ringColor: string;
   /** 0–1, how much of the pause has elapsed. */
   ringProgress: number;
@@ -19,37 +20,49 @@ export interface InterventionVM {
   nevermindLabel: string;
   openInsta: () => void;
   neverMind: () => void;
+  /** Small note under the buttons once Instagram can be opened. */
+  openHint?: string;
 }
 
-export default function InterventionScreen({ v }: { v: InterventionVM }) {
+/**
+ * The 15-second pause. `fullscreen` is for a real phone browser: padding
+ * follows the safe areas and the ring shrinks on short screens.
+ */
+export default function InterventionScreen({ v, fullscreen = false }: { v: InterventionVM; fullscreen?: boolean }) {
   const { phase } = v;
+  // On real phones, scale with the visible height so short screens (iPhone SE
+  // with Safari's toolbars) still fit everything without scrolling.
+  const ringSize = fullscreen ? 'min(196px, 22svh)' : '196px';
+  const questionSize = fullscreen ? 'min(32px, 4.6svh)' : '32px';
+  const chipHeight = fullscreen ? 'min(48px, 6.4svh)' : '48px';
   return (
-    <div style={{ position: 'absolute', inset: 0, background: '#16130F', color: '#F3EDE2', display: 'flex', flexDirection: 'column', padding: '64px 24px 44px', boxSizing: 'border-box' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <div style={{ width: 20, height: 20, borderRadius: 6, background: IG_GRADIENT }} />
-          <span style={{ fontSize: 14, fontWeight: 600 }}>Instagram</span>
-        </div>
-        <span style={{ font: `400 11px ${MONO}`, color: '#A69C8F', letterSpacing: '.06em' }}>{v.ivTag}</span>
-      </div>
+    <div style={{
+      position: 'absolute', inset: 0, background: '#16130F', color: '#F3EDE2', display: 'flex', flexDirection: 'column', boxSizing: 'border-box', overflowY: 'auto',
+      padding: fullscreen
+        ? 'calc(env(safe-area-inset-top, 0px) + 28px) 24px calc(env(safe-area-inset-bottom, 0px) + 24px)'
+        : '64px 24px 44px',
+    }}>
+      <h1 style={{ margin: 0, textAlign: 'center', font: `700 30px/1.1 ${SANS}`, letterSpacing: '.1em', textTransform: 'uppercase' }}>
+        Attempt <span style={{ color: '#C084FC' }}>#{v.attempt}</span>
+      </h1>
 
-      <div style={{ display: 'flex', justifyContent: 'center', marginTop: 30 }}>
-        <div style={{ position: 'relative', width: 196, height: 196 }}>
+      <div style={{ display: 'flex', justifyContent: 'center', marginTop: fullscreen ? 'min(28px, 3svh)' : 26 }}>
+        <div style={{ position: 'relative', width: ringSize, height: ringSize }}>
           <Ring size={196} r={90} stroke={5} track="#2E2822" color={v.ringColor} progress={v.ringProgress} />
           <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 2 }}>
-            <span style={{ font: `400 92px/0.9 ${SERIF}` }}>{v.ivNum}</span>
+            <span style={{ font: `400 ${fullscreen ? 'min(92px, 10svh)' : '92px'}/0.9 ${SERIF}` }}>{v.ivNum}</span>
             <span style={{ font: `400 10px ${MONO}`, color: '#A69C8F', letterSpacing: '.12em' }}>SECONDS</span>
           </div>
         </div>
       </div>
 
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 18 }}>
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: fullscreen ? 14 : 18, padding: fullscreen ? '12px 0' : 0 }}>
         {phase === 'intent' && (
           <>
-            <span style={{ font: `400 32px/1.08 ${SERIF}`, textAlign: 'center', textWrap: 'balance' }}>What are you opening Instagram for?</span>
+            <span style={{ font: `400 ${questionSize}/1.08 ${SERIF}`, textAlign: 'center', textWrap: 'balance' }}>What are you opening Instagram for?</span>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 9, justifyContent: 'center' }}>
               {v.intents.map(it => (
-                <button key={it.label} className="hv-intent press-96" onClick={it.pick} style={{ height: 48, padding: '0 18px', borderRadius: 999, border: '1px solid #3A332C', background: '#221E19', color: '#F3EDE2', fontSize: 15, fontWeight: 600, cursor: 'pointer' }}>
+                <button key={it.label} className="hv-intent press-96" onClick={it.pick} style={{ height: chipHeight, padding: '0 18px', borderRadius: 999, border: '1px solid #3A332C', background: '#221E19', color: '#F3EDE2', fontSize: 15, fontWeight: 600, cursor: 'pointer' }}>
                   {it.label}
                 </button>
               ))}
@@ -89,6 +102,9 @@ export default function InterventionScreen({ v }: { v: InterventionVM }) {
         <button className="hv-dark" onClick={v.neverMind} style={{ height: 52, borderRadius: 18, border: '1px solid #3A332C', background: 'transparent', color: '#F3EDE2', fontSize: 16, fontWeight: 600, cursor: 'pointer' }}>
           {v.nevermindLabel}
         </button>
+        {phase === 'done' && v.openHint && (
+          <span style={{ fontSize: 12, color: '#A69C8F', textAlign: 'center', marginTop: 2 }}>{v.openHint}</span>
+        )}
       </div>
     </div>
   );

@@ -22,10 +22,14 @@ On a phone-sized screen it runs full-screen without the device frame or side pan
 
 On a phone, or with `?app`, the site is the real Friction app: Today / Rules / Streak from real data stored on the device (localStorage). Opened with `?pause`, it runs the shield and 15-second pause for one Instagram attempt.
 
-It's wired to the real Instagram with iPhone Shortcuts, which is free and needs no developer account:
+It's wired to the real Instagram with iPhone Shortcuts, which is free and needs no developer account. Both pieces live on the phone; the website can't change them.
 
-- An automation for **Instagram is opened** opens `https://itsmaryaamm.github.io/Friction/?pause`, unless a pass from the last 10 minutes exists.
-- **Open Instagram** in the pause runs the `Friction Open` shortcut. That shortcut saves the current time as the pass and opens Instagram.
+- **Automation** (Instagram → Is Opened → Run Immediately):
+  Get `friction-pass.txt` → Get Date Modified → If Date Modified is in the last 10 minutes: Stop This Shortcut → End If → Open `https://itsmaryaamm.github.io/Friction/?pause`
+- **`Friction Open` shortcut**, run by **Open Instagram** after the pause:
+  Save the pass text to `friction-pass.txt` (overwrite on) → Start Timer for 10 minutes (Clock) → Open Instagram
+
+Every intent gets the same 10-minute pass. The Clock timer only shows how much of that pass is left (Lock Screen and, where supported, Dynamic Island). It counts elapsed time, including time outside Instagram, and alerts when it ends, but it doesn't close or block Instagram. On iOS 17 and later, Start Timer adds a new timer alongside any already running; on iOS 16 and earlier, the Clock app has a single timer, which this replaces.
 
 Add `?demo` to see the investor demo on a phone.
 

@@ -47,7 +47,7 @@ export function Ring({ size, r, stroke, track, color, progress, defs }: {
   const c = 2 * Math.PI * r;
   const half = size / 2;
   return (
-    <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} style={{ position: 'absolute', inset: 0, transform: 'rotate(-90deg)' }}>
+    <svg width="100%" height="100%" viewBox={`0 0 ${size} ${size}`} style={{ position: 'absolute', inset: 0, transform: 'rotate(-90deg)' }}>
       {defs && <defs>{defs}</defs>}
       <circle cx={half} cy={half} r={r} fill="none" stroke={track} strokeWidth={stroke} />
       <circle cx={half} cy={half} r={r} fill="none" stroke={color} strokeWidth={stroke} strokeLinecap="round"
