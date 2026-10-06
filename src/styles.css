@@ -1,0 +1,32 @@
+body {
+  margin: 0;
+  background: #ebe5da;
+  font-family: 'Instrument Sans', system-ui, sans-serif;
+  color: #16130f;
+  -webkit-font-smoothing: antialiased;
+}
+a { color: #16130f; }
+a:hover { color: #7e22ce; }
+button { font-family: inherit; }
+
+@keyframes fr-pop {
+  0% { transform: scale(0.97); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+@keyframes fr-drop {
+  0% { transform: translateY(-16px); opacity: 0; }
+  100% { transform: translateY(0); opacity: 1; }
+}
+
+/* Interaction states (the prototype's style-hover / style-active). */
+.hv-step:hover { background: rgba(22, 19, 15, 0.04) !important; }
+.hv-intent:hover { border-color: #a855f7 !important; }
+.hv-dark:hover { background: #221e19 !important; }
+.hv-thread:hover { background: #f6f6f6 !important; }
+.hv-play:hover { background: #2e2822 !important; }
+.hv-reset:hover { background: rgba(22, 19, 15, 0.05) !important; }
+.press-97:active { transform: scale(0.97); }
+.press-98:active { transform: scale(0.98); }
+.press-96:active { transform: scale(0.96); }
+.press-94:active { transform: scale(0.94); }
+.press-90:active { transform: scale(0.9); }
